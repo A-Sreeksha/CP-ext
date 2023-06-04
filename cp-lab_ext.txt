@@ -1,0 +1,988 @@
+1)DIET PLAN PERFORMANCE
+
+import java.util.*;
+
+class DietPlanPerformance {
+    public int dietPlanPerformance(int[] calories, int k, int lower, int upper) {
+        int points = 0;
+        int sum = 0;
+        for (int i = 0; i < k; i++)
+            sum += calories[i];
+        if (sum > upper)
+            points++;
+        else if (sum < lower)
+            points--;
+        int length = calories.length;
+        for (int i = k; i < length; i++) {
+            sum += calories[i];
+            sum -= calories[i - k];
+            if (sum > upper)
+                points++;
+            else if (sum < lower)
+                points--;
+        }
+        return points;
+    }
+
+    public static void main(String args[]) {
+        Scanner sc = new Scanner(System.in);
+        System.out.println("Enter the number of calories:");
+        int n = sc.nextInt();
+        int calories[] = new int[n];
+        System.out.println("Enter the calories:");
+        for (int i = 0; i < n; i++) {
+            calories[i] = sc.nextInt();
+        }
+        System.out.println("Enter the number of days (k):");
+        int k = sc.nextInt();
+        System.out.println("Enter the lower value:");
+        int lower = sc.nextInt();
+        System.out.println("Enter the upper value:");
+        int upper = sc.nextInt();
+        System.out.println("Result: " + new DietPlanPerformance().dietPlanPerformance(calories, k, lower, upper));
+    }
+}
+
+-----------------------------------------------------------------------------------------------------------------
+
+2) remove all 1’s with row and column flips in a binary matrix using bit manipulation
+
+
+import java.util.*;
+
+class WithFlipsRemoveAllOnesBits {
+    public static boolean removeOnes(int[][] grid) {
+        // every row should be equal to the first row or complement to the first row
+        // or else there will always be an extra value
+        int rows = grid.length;
+        int columns = grid[0].length;
+        
+        // if the matrix only has one row then it is always true
+        if (rows <= 1) {
+            return true;
+        }
+        
+        int[] firstRow = grid[0];
+        int[] revRow = reverse(grid[0]);
+        
+        // start with the second row, compare all values to the first row
+        for (int i = 1; i < rows; i++) {
+            for (int j = 0; j < columns; j++) {
+                // if the first element of rows are the same
+                if (grid[i][0] == firstRow[0]) {
+                    // then every other element should be the same too
+                    if (grid[i][j] != firstRow[j]) {
+                        return false;
+                    }
+                } else {
+                    // otherwise, every element should be complementary
+                    if (grid[i][j] != revRow[j]) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    public static int[] reverse(int[] row) {
+        int[] revRow = new int[row.length];
+        for (int i = 0; i < row.length; ++i) {
+            revRow[i] = row[i] ^ 1;
+        }
+        return revRow;
+    }
+
+    public static void main(String[] args) {
+        Scanner s = new Scanner(System.in);
+        System.out.println("Enter square matrix order:");
+        int n = s.nextInt();
+        int[][] grid = new int[n][n];
+        System.out.println("Enter the binary matrix:");
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                grid[i][j] = s.nextInt();
+            }
+        }
+        System.out.println(removeOnes(grid));
+    }
+}
+
+-----------------------------------------------------------------------------------------------------------
+
+3)TRIE
+
+import java.util.*;
+
+class Trie {
+    static final int NUM_CHARS = 26;
+    static boolean isDeleted = false;
+
+    static class TrieNode {
+        TrieNode[] children = new TrieNode[NUM_CHARS];
+        boolean isEndOfWord;
+
+        TrieNode() {
+            isEndOfWord = false;
+            for (int i = 0; i < NUM_CHARS; i++)
+                children[i] = null;
+        }
+    };
+
+    static TrieNode root;
+
+    static void insert(String key) {
+        int level;
+        int length = key.length();
+        int index;
+        TrieNode currentNode = root;
+        for (level = 0; level < length; level++) {
+            index = key.charAt(level) - 'a';
+            if (currentNode.children[index] == null)
+                currentNode.children[index] = new TrieNode();
+            currentNode = currentNode.children[index];
+        }
+        currentNode.isEndOfWord = true;
+    }
+
+    static boolean search(String key) {
+        int level;
+        int length = key.length();
+        int index;
+        TrieNode currentNode = root;
+        for (level = 0; level < length; level++) {
+            index = key.charAt(level) - 'a';
+            if (currentNode.children[index] == null)
+                return false;
+            currentNode = currentNode.children[index];
+        }
+        return currentNode.isEndOfWord;
+    }
+
+    static boolean isEmpty(TrieNode root) {
+        for (int i = 0; i < NUM_CHARS; i++)
+            if (root.children[i] != null)
+                return false;
+        return true;
+    }
+
+    static TrieNode delete(TrieNode root, String key, int depth) {
+        if (root == null)
+            return null;
+        if (depth == key.length()) {
+            isDeleted = root.isEndOfWord;
+            if (root.isEndOfWord)
+                root.isEndOfWord = false;
+            if (isEmpty(root))
+                return null;
+            return root;
+        }
+        int index = key.charAt(depth) - 'a';
+        if (root.children[index] == null)
+            return null;
+        root.children[index] = delete(root.children[index], key, depth + 1);
+        if (isEmpty(root) && root.isEndOfWord == false)
+            return null;
+        return root;
+    }
+
+    static boolean isLeafNode(TrieNode root) {
+        return root.isEndOfWord == true;
+    }
+
+    static void print(TrieNode root, char[] str, int level) {
+        if (isLeafNode(root)) {
+            for (int k = level; k < str.length; k++)
+                str[k] = 0;
+            System.out.println(str);
+        }
+        int i;
+        for (i = 0; i < NUM_CHARS; i++) {
+            if (root.children[i] != null) {
+                str[level] = (char) (i + 'a');
+                print(root.children[i], str, level + 1);
+            }
+        }
+    }
+
+    public static void main(String args[]) {
+        Scanner sc = new Scanner(System.in);
+        String keys[] = sc.nextLine().split(" ");
+        root = new TrieNode();
+        int i;
+        for (i = 0; i < keys.length; i++)
+            insert(keys[i]);
+        char[] str = new char[50];
+        System.out.println("Content of Trie: ");
+        print(root, str, 0);
+        while (true) {
+            System.out.println("Enter a word to search");
+            String word = sc.next();
+            if (word.equals("-1"))
+                break;
+            if (search(word) == true)
+                System.out.println(word + " is present");
+            else
+                System.out.println(word + " is not present");
+        }
+        while (root != null) {
+            System.out.println("Enter a word to delete");
+            String word = sc.next();
+            if (word.equals("-1"))
+                break;
+            if (delete(root, word, 0) != null && isDeleted == true) {
+                System.out.println(word + " is deleted");
+            } else {
+                System.out.println(word + " is not present in Trie to be deleted");
+            }
+            System.out.println("Content of Trie after deletion: ");
+            print(root, str, 0);
+        }
+    }
+}
+---------------------------------------------------------------------------------------------------
+5)Kth Smallest sub array
+
+
+import java.util.Scanner;
+
+class KthSmallestSubarraySum {
+    public int kthSmallestSubarraySum(int[] nums, int k) {
+        int min = Integer.MAX_VALUE, sum = 0;
+        for (int num : nums) {
+            min = Math.min(min, num);
+            sum += num;
+        }
+        int low = min, high = sum;
+        while (low < high) {
+            int mid = (high - low) / 2 + low;
+            int count = countSubarrays(nums, mid);
+            if (count < k)
+                low = mid + 1;
+            else
+                high = mid;
+        }
+        return low;
+    }
+
+    public int countSubarrays(int[] nums, int threshold) {
+        int count = 0;
+        int sum = 0;
+        int length = nums.length;
+        int left = 0, right = 0;
+        while (right < length) {
+            sum += nums[right];
+            while (sum > threshold) {
+                sum -= nums[left];
+                left++;
+            }
+            count += right - left + 1;
+            right++;
+        }
+        return count;
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        System.out.println("Enter array size: ");
+        int n = sc.nextInt();
+        int array[] = new int[n];
+        System.out.println("Enter the elements: ");
+        for (int i = 0; i < n; i++) {
+            array[i] = sc.nextInt();
+        }
+        System.out.println("Enter the kth smallest subarray size: ");
+        int k = sc.nextInt();
+        System.out.println(new KthSmallestSubarraySum().kthSmallestSubarraySum(array, k));
+    }
+}
+
+--------------------------------------------------------------------------------------------------
+
+6)Connected components in a graph using union-find
+
+import java.util.*;
+
+class ConnectedComponents {
+    int[] parent;
+    int[] size;
+
+    public int countComponents(int n, int[][] edges) {
+        parent = new int[n];
+        size = new int[n];
+        for (int i = 0; i < n; i++) {
+            parent[i] = -1;
+            size[i] = 1;
+        }
+        int components = n;
+        for (int[] e : edges) {
+            int p1 = find(e[0]);
+            int p2 = find(e[1]);
+            if (p1 != p2) {
+                if (size[p1] < size[p2]) {
+                    // Merge small size to large size
+                    size[p2] += size[p1];
+                    parent[p1] = p2;
+                } else {
+                    size[p1] += size[p2];
+                    parent[p2] = p1;
+                }
+                components--;
+            }
+        }
+        return components;
+    }
+
+    private int find(int i) {
+        while (parent[i] >= 0)
+            i = parent[i];
+        return i;
+    }
+
+    public static void main(String args[]) {
+        Scanner sc = new Scanner(System.in);
+        int n = sc.nextInt();
+        int e = sc.nextInt();
+        int edges[][] = new int[e][2];
+        for (int i = 0; i < e; i++)
+            for (int j = 0; j < 2; j++)
+                edges[i][j] = sc.nextInt();
+
+        System.out.println(new ConnectedComponents().countComponents(n, edges));
+    }
+}
+
+
+-------------------------------------------------------------------------------------------------------
+7) Parallel COurses
+
+import java.util.*;
+
+public class ParallelCourses {
+    public int minimumSemesters(int numCourses, int[][] prerequisites, int maxCourses) {
+        int graph[][] = new int[numCourses][numCourses];
+        int[] indegree = new int[numCourses];
+
+        // Populate the adjacency list using the prerequisites array
+        for (int[] prerequisite : prerequisites) {
+            int u = prerequisite[0];
+            int v = prerequisite[1];
+            graph[u][v] = 1;
+            indegree[v]++;
+        }
+
+        // Perform a topological sort to find the order in which the courses should be taken
+        Queue<Integer> queue = new LinkedList<>();
+        for (int i = 0; i < numCourses; i++) {
+            if (indegree[i] == 0) {
+                queue.offer(i);
+            }
+        }
+
+        int semesters = 0;
+        int coursesTaken = 0;
+        while (!queue.isEmpty()) {
+            int coursesThisSemester = Math.min(queue.size(), maxCourses);
+            for (int i = 0; i < coursesThisSemester; i++) {
+                int u = queue.poll();
+                coursesTaken++;
+
+                for (int v = 0; v < numCourses; v++) {
+                    if (graph[u][v] == 1 && --indegree[v] == 0) {
+                        queue.offer(v);
+                    }
+                }
+            }
+            semesters++;
+        }
+
+        if (coursesTaken != numCourses) {
+            return -1; // cannot complete all courses
+        }
+
+        return semesters;
+    }
+
+    public static void main(String[] args) {
+        Scanner s = new Scanner(System.in);
+        int numCourses = s.nextInt();
+        int c = s.nextInt();
+        int prerequisites[][] = new int[c][2];
+        for (int i = 0; i < c; i++) {
+            for (int j = 0; j < 2; j++) {
+                prerequisites[i][j] = s.nextInt();
+            }
+        }
+        int maxCourses = s.nextInt();
+
+        ParallelCourses p = new ParallelCourses();
+        System.out.println(p.minimumSemesters(numCourses, prerequisites, maxCourses));
+    }
+}
+
+-----------------------------------------------------------------------------------------------------------
+8) Distinct numbers in each subarray
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Scanner;
+
+class DistinctCount {
+    // Function to find the count of distinct elements in every subarray/ of size `k` in the array
+    public static void findDistinctCount(int[] A, int k) {
+        // map to store the frequency of elements in the current window of size `k`
+        Map<Integer, Integer> freq = new HashMap<>();
+        // maintains the count of distinct elements in every subarray of size `k`
+        int distinct = 0;
+        // loop through the array
+        for (int i = 0; i < A.length; i++) {
+            // ignore the first `k` elements
+            if (i >= k) {
+                // remove the first element from the subarray by reducing its
+                // frequency in the map
+                freq.put(A[i - k], freq.getOrDefault(A[i - k], 0) - 1);
+                // reduce the distinct count if we are left with 0
+                if (freq.get(A[i - k]) == 0) {
+                    distinct--;
+                }
+            }
+            // add the current element to the subarray by incrementing its
+            // count in the map
+            freq.put(A[i], freq.getOrDefault(A[i], 0) + 1);
+            // increment distinct count by 1 if element occurs for the first time in the current window
+            if (freq.get(A[i]) == 1) {
+                distinct++;
+            }
+
+            // print count of distinct elements in the current subarray
+            if (i >= k - 1) {
+                System.out.println("The count of distinct elements in subarray [" +
+                        (i - k + 1) + ", " + i + "]" + " is " + distinct);
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        System.out.println("Enter array size: ");
+        int n = sc.nextInt();
+        int array[] = new int[n];
+        System.out.println("Enter the elements: ");
+        for (int i = 0; i < n; i++) {
+            array[i] = sc.nextInt();
+        }
+        System.out.println("Enter the subarray size: ");
+        int k = sc.nextInt();
+        findDistinctCount(array, k);
+    }
+}
+----------------------------------------------------------------------------------------------------------------------
+
+9) Valid word abbr
+
+import java.util.*;
+
+class ValidWordAbbreviation {
+    public boolean validWordAbbreviation(String word, String abbr) {
+        int i = 0, j = 0;
+        while (i < word.length() && j < abbr.length()) {
+            if (word.charAt(i) == abbr.charAt(j)) {
+                ++i;
+                ++j;
+                continue;
+            }
+            if (abbr.charAt(j) <= '0' || abbr.charAt(j) > '9') {
+                return false;
+            }
+            int start = j;
+            while (j < abbr.length() && abbr.charAt(j) >= '0' && abbr.charAt(j) <= '9') {
+                ++j;
+            }
+            int num = Integer.valueOf(abbr.substring(start, j));
+            i += num;
+        }
+        return i == word.length() && j == abbr.length();
+    }
+
+    public static void main(String args[]) {
+        Scanner in = new Scanner(System.in);
+        System.out.println("Enter word: ");
+        String word = in.next();
+        System.out.println("Enter abbreviation: ");
+        String abbrv = in.next();
+        System.out.println(new ValidWordAbbreviation().validWordAbbreviation(word, abbrv));
+    }
+}
+
+----------------------------------------------------------------------------------------------------------------
+10)count no of ones in bit repr
+
+class CountSetBit
+{
+private static int helper(int n)
+{
+int count = 0;
+while (n > 0)
+{
+n &= (n - 1);
+count++;
+}
+return count;
+}
+public static void main(String[] args)
+{
+int number = 125;
+System.out.println("SetBit Count is : " + helper(number));
+}
+}
+
+----------------------------------------------------------------------------------------------
+
+11)longest string in words array such that every prefix of it is also in words using a trie data structure.
+
+import java.util.*;
+
+class Solution {
+    TrieNode root = new TrieNode();
+    String res = "";
+
+    public String longestWord(String[] words) {
+        for (String word : words) {
+            addWord(word);
+        }
+        for (String word : words) {
+            searchPrefix(word);
+        }
+        return res;
+    }
+
+    private void searchPrefix(String word) {
+        TrieNode cur = root;
+        for (char c : word.toCharArray()) {
+            cur = cur.children[c - 'a'];
+            if (!cur.isWord) {
+                return;
+            }
+        }
+        if (res.length() < word.length() || (res.length() == word.length() && res.compareTo(word) > 0)) {
+            res = word;
+        }
+    }
+
+    private void addWord(String word) {
+        TrieNode cur = root;
+        for (char c : word.toCharArray()) {
+            if (cur.children[c - 'a'] == null) {
+                cur.children[c - 'a'] = new TrieNode();
+            }
+            cur = cur.children[c - 'a'];
+        }
+        cur.isWord = true;
+    }
+}
+
+class TrieNode {
+    TrieNode[] children = new TrieNode[26];
+    boolean isWord;
+}
+
+public class LongestWord {
+    public static void main(String args[]) {
+        Scanner sc = new Scanner(System.in);
+        System.out.println("Enter the words separated by space: ");
+        String dictStr = sc.nextLine();
+        String[] dict = dictStr.split(" ");
+        System.out.println(new Solution().longestWord(dict));
+    }
+}
+
+------------------------------------------------------------------------------------------------------------------------
+
+12)Kth Largest Element in an Array Using Treap
+
+import java.util.*;
+
+class TreapNode {
+    int data;
+    int priority;
+    TreapNode left;
+    TreapNode right;
+
+    TreapNode(int data) {
+        this.data = data;
+        this.priority = new Random().nextInt(1000);
+        this.left = this.right = null;
+    }
+}
+
+class KthLargest {
+    static int k;
+
+    public static TreapNode rotateLeft(TreapNode root) {
+        TreapNode R = root.right;
+        TreapNode X = root.right.left;
+        R.left = root;
+        root.right = X;
+        return R;
+    }
+
+    public static TreapNode rotateRight(TreapNode root) {
+        TreapNode L = root.left;
+        TreapNode Y = root.left.right;
+        L.right = root;
+        root.left = Y;
+        return L;
+    }
+
+    public static TreapNode insertNode(TreapNode root, int data) {
+        if (root == null) {
+            return new TreapNode(data);
+        }
+        if (data < root.data) {
+            root.left = insertNode(root.left, data);
+            if (root.left != null && root.left.priority > root.priority) {
+                root = rotateRight(root);
+            }
+        } else {
+            root.right = insertNode(root.right, data);
+            if (root.right != null && root.right.priority > root.priority) {
+                root = rotateLeft(root);
+            }
+        }
+        return root;
+    }
+
+    static void inorder(TreapNode root) {
+        if (root == null)
+            return;
+        inorder(root.left);
+        k--;
+        if (k == 0) {
+            System.out.print(root.data);
+            return;
+        }
+        inorder(root.right);
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        System.out.println("Enter the total number of elements: ");
+        int n = sc.nextInt();
+        System.out.println("Enter the value of k: ");
+        int p = sc.nextInt();
+        k = n - p + 1;
+        int arr[] = new int[n];
+        System.out.println("Enter the elements: ");
+        for (int i = 0; i < n; i++) {
+            arr[i] = sc.nextInt();
+        }
+        TreapNode root = null;
+        for (int a : arr) {
+            root = insertNode(root, a);
+        }
+        System.out.print("The kth largest element is: ");
+        inorder(root);
+    }
+}
+
+------------------------------------------------------------------------------------------------------------
+13) Articulation points in a graph using dfs
+
+import java.util.Scanner;
+
+public class ArticulationPoint {
+    public static void main(String[] args) {
+        Scanner s = new Scanner(System.in);
+        int vertices = s.nextInt();
+        int edges = s.nextInt();
+        Graph g = new Graph(vertices);
+        for (int i = 1; i <= edges; i++) {
+            int start = s.nextInt();
+            int end = s.nextInt();
+            g.addEdge(start, end);
+        }
+        g.AP();
+    }
+}
+
+class Graph {
+    private int V; // number of vertices
+    private int[][] adj; // adjacency matrix
+    private int time; // time used in DFS
+    private static final int NIL = -1; // constant value for uninitialized variables
+
+    public Graph(int V) {
+        this.V = V;
+        adj = new int[V][V];
+    }
+
+    // add an edge to the graph
+    public void addEdge(int v, int w) {
+        adj[v][w] = 1;
+        adj[w][v] = 1;
+    }
+
+    // utility function to find articulation points in the graph
+    private void APUtil(int u, boolean[] visited, int[] disc, int[] low, int[] parent, boolean[] ap) {
+        // count children in DFS tree
+        int children = 0;
+        // mark current node as visited and initialize discovery time and low value
+        visited[u] = true;
+        disc[u] = low[u] = ++time;
+        // loop through all vertices adjacent to this vertex
+        for (int v = 0; v < V; v++) {
+            if (adj[u][v] == 1) {
+                // if v is not visited yet, then make it a child of u in DFS tree and recur for it
+                if (!visited[v]) {
+                    children++;
+                    parent[v] = u;
+                    APUtil(v, visited, disc, low, parent, ap);
+                    // check if the subtree rooted with v has a connection to one of the ancestors of u
+                    low[u] = Math.min(low[u], low[v]);
+                    // u is an articulation point in the following cases:
+                    // 1. u is the root of DFS tree and has two or more children
+                    if (parent[u] == NIL && children > 1)
+                        ap[u] = true;
+                    // 2. if u is not the root and low value of one of its child is more than discovery value of u
+                    if (parent[u] != NIL && low[v] >= disc[u])
+                        ap[u] = true;
+                }
+                // update low value of u for parent function calls
+                else if (v != parent[u]) {
+                    low[u] = Math.min(low[u], disc[v]);
+                }
+            }
+        }
+    }
+
+    // main function to find articulation points in the graph
+    public void AP() {
+        boolean[] visited = new boolean[V];
+        int[] disc = new int[V];
+        int[] low = new int[V];
+        int[] parent = new int[V];
+        boolean[] ap = new boolean[V];
+        // initialize parent and visited, and ap arrays
+        for (int i = 0; i < V; i++) {
+            parent[i] = NIL;
+            visited[i] = false;
+            ap[i] = false;
+        }
+        // call the recursive helper function to find articulation points
+        for (int i = 0; i < V; i++) {
+            if (!visited[i]) {
+                APUtil(i, visited, disc, low, parent, ap);
+            }
+        }
+        // print articulation points
+        for (int i = 0; i < V; i++) {
+            if (ap[i]) {
+                System.out.print(i + " ");
+            }
+        }
+    }
+}
+---------------------------------------------------------------------------------------------------------------------------
+
+14) Palindrome LL
+
+import java.util.LinkedList;
+
+public class PalindromeLinkedList {
+    // Head of the list
+    Node head;
+    Node left;
+
+    public class Node {
+        public char data;
+        public Node next;
+
+        // Linked list node
+        public Node(char d) {
+            data = d;
+            next = null;
+        }
+    }
+
+    // Initial parameters to this function are &head and head
+    boolean isPalindromeUtil(Node right) {
+        left = head;
+        // Stop recursion when right becomes null
+        if (right == null)
+            return true;
+        // If sub-list is not palindrome then no need to check for the current
+        // left and right, return false
+        boolean isp = isPalindromeUtil(right.next);
+        if (isp == false)
+            return false;
+
+        // Check values at current left and right
+        boolean isp1 = (right.data == left.data);
+        left = left.next;
+        // Move left to next node;
+        return isp1;
+    }
+
+    // A wrapper over isPalindrome(Node head)
+    boolean isPalindrome(Node head) {
+        boolean result = isPalindromeUtil(head);
+        return result;
+    }
+
+    // Push a node to linked list. Note that this function changes the head
+    public void push(char new_data) {
+        // Allocate the node and put in the data
+        Node new_node = new Node(new_data);
+        // Link the old list off the the new one
+        new_node.next = head;
+        // Move the head to point to new node
+        head = new_node;
+    }
+
+    // A utility function to print a given linked list
+    void printList(Node ptr) {
+        while (ptr != null) {
+            System.out.print(ptr.data + "->");
+            ptr = ptr.next;
+        }
+        System.out.println("Null");
+    }
+
+    public static void main(String[] args) {
+        PalindromeLinkedList llist = new PalindromeLinkedList();
+        char[] str = { 'a', 'b', 'a', 'c', 'a', 'b', 'a' };
+        for (int i = 0; i < 7; i++) {
+            llist.push(str[i]);
+            llist.printList(llist.head);
+            if (llist.isPalindrome(llist.head)) {
+                System.out.println("Is Palindrome");
+                System.out.println("");
+            } else {
+                System.out.println("Not Palindrome");
+                System.out.println("");
+            }
+        }
+    }
+}
+----------------------------------------------------------------------------------------------------------------------
+
+15)max flow in a graph
+
+import java.util.*;
+
+public class MaxFlow {
+    static int V; // number of vertices in the graph
+
+    // method to find the maximum flow in a flow network using the Edmonds-Karp algorithm
+    static int findMaxFlow(int[][] graph, int source, int sink) {
+        int[][] residualGraph = new int[V][V];
+        for (int i = 0; i < V; i++) {
+            for (int j = 0; j < V; j++) {
+                residualGraph[i][j] = graph[i][j];
+            }
+        }
+
+        int[] parent = new int[V];
+        int maxFlow = 0;
+        while (bfs(residualGraph, source, sink, parent)) {
+            int pathFlow = Integer.MAX_VALUE;
+            for (int v = sink; v != source; v = parent[v]) {
+                int u = parent[v];
+                pathFlow = Math.min(pathFlow, residualGraph[u][v]);
+            }
+            for (int v = sink; v != source; v = parent[v]) {
+                int u = parent[v];
+                residualGraph[u][v] -= pathFlow;
+                residualGraph[v][u] += pathFlow;
+            }
+            maxFlow += pathFlow;
+        }
+        return maxFlow;
+    }
+
+    // helper method to find the shortest augmenting path in the residual graph using BFS
+    static boolean bfs(int[][] residualGraph, int source, int sink, int[] parent) {
+        boolean[] visited = new boolean[V];
+        Arrays.fill(visited, false);
+        Queue<Integer> queue = new LinkedList<Integer>();
+        queue.add(source);
+        visited[source] = true;
+        parent[source] = -1;
+        while (!queue.isEmpty()) {
+            int u = queue.poll();
+            for (int v = 0; v < V; v++) {
+                if (!visited[v] && residualGraph[u][v] > 0) {
+                    queue.add(v);
+                    parent[v] = u;
+                    visited[v] = true;
+                }
+            }
+        }
+        return visited[sink];
+    }
+
+    public static void main(String[] args) {
+        Scanner s = new Scanner(System.in);
+        System.out.println("Enter number of vertices");
+        V = s.nextInt();
+        int[][] graph = new int[V][V];
+        System.out.println("Enter the adjacency matrix of the directed graph");
+        for (int i = 0; i < V; i++)
+            for (int j = 0; j < V; j++)
+                graph[i][j] = s.nextInt();
+        System.out.println("Enter source and sink");
+        int source = s.nextInt();
+        int sink = s.nextInt();
+        int maxFlow = findMaxFlow(graph, source, sink);
+        System.out.println(maxFlow);
+    }
+}
+
+---------------------------------------------------------------------------------------------------------------
+
+16)lexographically smallest equiv
+
+import java.util.Scanner;
+
+class LexSmallestEquivalentString {
+    static int p[];
+
+    public static String smallestEquivalentString(String A, String B, String S) {
+        p = new int[26];
+        for (int i = 0; i < 26; i++) {
+            p[i] = -1;
+        }
+        for (int i = 0; i < A.length(); i++) {
+            int a = A.charAt(i) - 'a';
+            int b = B.charAt(i) - 'a';
+            int end1 = find(a);
+            int end2 = find(b);
+            if (end1 < end2) {
+                p[end2] = end1;
+            } else if (end1 > end2) {
+                p[end1] = end2;
+            }
+        }
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < S.length(); i++) {
+            int c = S.charAt(i) - 'a';
+            sb.append((char) ('a' + find(c)));
+        }
+        return sb.toString();
+    }
+
+    static int find(int i) {
+        while (p[i] >= 0)
+            i = p[i];
+        return i;
+    }
+
+    public static void main(String args[]) {
+        Scanner sc = new Scanner(System.in);
+        String A = sc.next();
+        String B = sc.next();
+        String T = sc.next();
+        System.out.println(smallestEquivalentString(A, B, T));
+    }
+}
+
+
